@@ -121,6 +121,14 @@ button.danger:hover {
   font-style: italic;
 }
 
+.error {
+  color: #dc3545;
+  background: #f8d7da;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
 hr {
   border: none;
   border-top: 1px solid #ddd;

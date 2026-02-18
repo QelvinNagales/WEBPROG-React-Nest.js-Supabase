@@ -10,10 +10,25 @@ export default function App() {
   const [form, setForm] = useState({ name: '', message: '' });
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', message: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const load = async () => {
-    const res = await fetch(API_URL);
-    setEntries(await res.json());
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('Fetching from:', API_URL);
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      const data = await res.json();
+      console.log('Data received:', data);
+      setEntries(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Load error:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -22,18 +37,32 @@ export default function App() {
 
   const save = async (e) => {
     e.preventDefault();
-    await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
-    setForm({ name: '', message: '' });
-    load();
+    try {
+      setError(null);
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      setForm({ name: '', message: '' });
+      await load();
+    } catch (err) {
+      console.error('Save error:', err);
+      setError(err.message);
+    }
   };
 
   const remove = async (id) => {
-    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-    load();
+    try {
+      setError(null);
+      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      await load();
+    } catch (err) {
+      console.error('Delete error:', err);
+      setError(err.message);
+    }
   };
 
   const startEdit = (entry) => {
@@ -47,14 +76,21 @@ export default function App() {
   };
 
   const updateEntry = async (id) => {
-    await fetch(`${API_URL}/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editForm),
-    });
-    setEditingId(null);
-    setEditForm({ name: '', message: '' });
-    load();
+    try {
+      setError(null);
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      setEditingId(null);
+      setEditForm({ name: '', message: '' });
+      await load();
+    } catch (err) {
+      console.error('Update error:', err);
+      setError(err.message);
+    }
   };
 
   return (
@@ -85,6 +121,9 @@ export default function App() {
         </form>
 
         <hr />
+
+        {error && <p className="error">Error: {error}</p>}
+        {loading && <p>Loading...</p>}
 
         <div className="entries">
           {entries && entries.length > 0 ? (
