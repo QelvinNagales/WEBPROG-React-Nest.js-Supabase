@@ -1,0 +1,8 @@
+{
+  "name": "webprog-react-nest-supabase",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.95.3"
+  }
+}
