@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import './App.css';
 
 // Use environment variable for the backend URL
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/guestbook';
+// In production (Vercel), use /api/guestbook; locally use localhost:3000
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api/guestbook' : 'http://localhost:3000/guestbook');
 
 export default function App() {
   const [entries, setEntries] = useState([]);
